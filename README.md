@@ -24,10 +24,29 @@ MCP server for AI-driven fair meeting point discovery. Find the best place to me
 
 Works out of the box with free routing (10 requests/day). For more, pay with Lightning sats.
 
+## Remote (HTTP/SSE)
+
+For ChatGPT, remote AI agents, or any client that connects over HTTP:
+
+```bash
+TRANSPORT=http npx rendezvous-mcp
+```
+
+This starts a Streamable HTTP server on port 3002 with the MCP endpoint at `/mcp`.
+
+### ChatGPT connector
+
+In ChatGPT settings, add an MCP server with:
+- **URL:** `http://your-host:3002/mcp`
+- **Transport:** Streamable HTTP
+
 ## Configuration
 
 | Variable | Default | Description |
 |----------|---------|-------------|
+| `TRANSPORT` | `stdio` | Transport mode: `stdio` or `http` |
+| `PORT` | `3002` | HTTP server port (HTTP mode only) |
+| `HOST` | `0.0.0.0` | HTTP server bind address (HTTP mode only) |
 | `VALHALLA_URL` | `https://routing.trotters.cc` | Routing engine URL |
 | `OVERPASS_URL` | Public endpoints | Venue search API |
 
