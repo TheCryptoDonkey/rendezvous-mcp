@@ -9,6 +9,8 @@
   "main": "./build/index.js",
   "exports": {
     ".": "./build/index.js",
+    "./routing": "./build/routing.js",
+    "./l402": "./build/l402.js",
     "./tools/*": "./build/tools/*.js"
   },
   "scripts": {
