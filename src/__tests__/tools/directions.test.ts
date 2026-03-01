@@ -33,7 +33,7 @@ describe('handleGetDirections', () => {
     expect(data.duration_minutes).toBe(120.5)
     expect(data.steps).toHaveLength(2)
     expect(data.steps[0].instruction).toBe('Head east on A4')
-    expect(data.geometry.type).toBe('LineString')
+    expect(data.geometry).toBeUndefined()
   })
 
   it('returns payment_required on 402', async () => {

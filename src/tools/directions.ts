@@ -50,7 +50,6 @@ export async function handleGetDirections(
           distance_km: Math.round(leg.distanceKm * 100) / 100,
           duration_minutes: Math.round(leg.durationMinutes * 10) / 10,
         })),
-        geometry: result.geometry,
       }, null, 2),
     }],
   }
