@@ -6,6 +6,7 @@ import { registerScoreVenuesTool } from './tools/score-venues.js'
 import { registerSearchVenuesTool } from './tools/search-venues.js'
 import { registerIsochroneTool } from './tools/isochrone.js'
 import { registerDirectionsTool } from './tools/directions.js'
+import { registerStoreCredentialsTool } from './tools/store-credentials.js'
 
 const TRANSPORT = process.env.TRANSPORT ?? 'stdio'
 const PORT = parseInt(process.env.PORT ?? '3002', 10)
@@ -27,6 +28,7 @@ registerScoreVenuesTool(server, routingClient)
 registerSearchVenuesTool(server, OVERPASS_URL)
 registerIsochroneTool(server, routingClient)
 registerDirectionsTool(server, routingClient)
+registerStoreCredentialsTool(server, routingClient)
 
 if (TRANSPORT === 'http') {
   const { default: express } = await import('express')
@@ -44,7 +46,7 @@ if (TRANSPORT === 'http') {
       status: 'ok',
       server: 'rendezvous-mcp',
       version: '0.1.0',
-      tools: ['score_venues', 'search_venues', 'get_isochrone', 'get_directions'],
+      tools: ['score_venues', 'search_venues', 'get_isochrone', 'get_directions', 'store_routing_credentials'],
     })
   })
 
