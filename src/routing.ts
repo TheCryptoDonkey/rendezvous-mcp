@@ -3,12 +3,28 @@ import type { LatLon, TransportMode, Isochrone, RouteMatrix, RouteGeometry } fro
 import { L402State } from './l402.js'
 import type { L402PaymentRequired } from './l402.js'
 
+const DEFAULT_VALHALLA_URL = 'https://routing.trotters.cc'
+
+/** Validate that a string is an HTTP(S) URL. */
+function validateUrl(url: string, label: string): string {
+  let parsed: URL
+  try { parsed = new URL(url) } catch {
+    throw new TypeError(`${label}: invalid URL "${url}"`)
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    throw new TypeError(`${label}: must use http or https, got "${parsed.protocol}"`)
+  }
+  return url.replace(/\/$/, '')
+}
+
 export class RoutingClient {
   readonly valhallaUrl: string
   private readonly l402: L402State
 
   constructor(config?: { valhallaUrl?: string }) {
-    this.valhallaUrl = config?.valhallaUrl ?? 'https://routing.trotters.cc'
+    this.valhallaUrl = config?.valhallaUrl
+      ? validateUrl(config.valhallaUrl, 'RoutingClient valhallaUrl')
+      : DEFAULT_VALHALLA_URL
     this.l402 = new L402State()
   }
 

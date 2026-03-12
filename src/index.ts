@@ -13,12 +13,12 @@ const require = createRequire(import.meta.url)
 const { version } = require('../package.json') as { version: string }
 
 const TRANSPORT = process.env.TRANSPORT ?? 'stdio'
-const PORT = parseInt(process.env.PORT ?? '3002', 10)
+const PORT = Math.max(1, Math.min(65535, parseInt(process.env.PORT ?? '3002', 10) || 3002))
 const HOST = process.env.HOST ?? '0.0.0.0'
 const VALHALLA_URL = process.env.VALHALLA_URL
 const OVERPASS_URL = process.env.OVERPASS_URL
 const CORS_ORIGIN = process.env.CORS_ORIGIN ?? '*'
-const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX ?? '60', 10)
+const RATE_LIMIT_MAX = Math.max(1, parseInt(process.env.RATE_LIMIT_MAX ?? '60', 10) || 60)
 const RATE_LIMIT_WINDOW = 60_000
 
 const server = new McpServer({
@@ -79,7 +79,7 @@ if (TRANSPORT === 'http') {
       status: 'ok',
       server: 'rendezvous-mcp',
       version,
-      valhalla_url: routingClient.valhallaUrl,
+      valhalla_configured: !!VALHALLA_URL,
       tools: ['score_venues', 'search_venues', 'get_isochrone', 'get_directions', 'store_routing_credentials'],
     })
   })

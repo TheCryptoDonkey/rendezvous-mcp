@@ -48,6 +48,10 @@
     "valhalla",
     "l402"
   ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
   "author": "TheCryptoDonkey",
   "repository": {
     "type": "git",

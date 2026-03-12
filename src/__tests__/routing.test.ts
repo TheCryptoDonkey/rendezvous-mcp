@@ -19,4 +19,21 @@ describe('RoutingClient', () => {
     expect(engine).toBeDefined()
     expect(engine.name).toBe('Valhalla')
   })
+
+  it('rejects non-http valhalla URL', () => {
+    expect(() => new RoutingClient({ valhallaUrl: 'ftp://evil.com' })).toThrow(TypeError)
+  })
+
+  it('rejects file:// valhalla URL', () => {
+    expect(() => new RoutingClient({ valhallaUrl: 'file:///etc/passwd' })).toThrow(TypeError)
+  })
+
+  it('rejects invalid valhalla URL', () => {
+    expect(() => new RoutingClient({ valhallaUrl: 'not a url' })).toThrow(TypeError)
+  })
+
+  it('strips trailing slash from valhalla URL', () => {
+    const client = new RoutingClient({ valhallaUrl: 'http://localhost:8002/' })
+    expect(client.valhallaUrl).toBe('http://localhost:8002')
+  })
 })
