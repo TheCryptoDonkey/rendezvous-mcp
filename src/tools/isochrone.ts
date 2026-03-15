@@ -54,11 +54,13 @@ export async function handleGetIsochrone(
       }],
     }
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err)
+    console.error('get_isochrone error:', err)
+    const message = err instanceof Error ? err.message : 'An unexpected error occurred'
+    const safeMessage = message.replace(/https?:\/\/[^\s]+/g, '[redacted-url]')
     return {
       content: [{
         type: 'text' as const,
-        text: JSON.stringify({ success: false, error: message }),
+        text: JSON.stringify({ success: false, error: safeMessage }),
       }],
       isError: true as const,
     }
