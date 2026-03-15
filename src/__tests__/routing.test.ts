@@ -14,7 +14,7 @@ describe('RoutingClient', () => {
 
   it('creates ValhallaEngine with L402 auth header when credentials stored', () => {
     const client = new RoutingClient()
-    client.storeL402Credentials('mac123', 'pre456')
+    client.storeL402Credentials('bWFjMTIz', 'abc456')
     const engine = client.getEngine()
     expect(engine).toBeDefined()
     expect(engine.name).toBe('Valhalla')

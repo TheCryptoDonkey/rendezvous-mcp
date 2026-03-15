@@ -13,18 +13,18 @@ describe('handleStoreRoutingCredentials', () => {
 
   it('calls storeL402Credentials with macaroon and preimage', async () => {
     await handleStoreRoutingCredentials({
-      macaroon: 'base64mac...',
-      preimage: 'abc123preimage',
+      macaroon: 'YWJjMTIz',
+      preimage: 'abc123def456',
     }, mockRoutingClient)
 
     expect(mockStoreL402Credentials).toHaveBeenCalledOnce()
-    expect(mockStoreL402Credentials).toHaveBeenCalledWith('base64mac...', 'abc123preimage')
+    expect(mockStoreL402Credentials).toHaveBeenCalledWith('YWJjMTIz', 'abc123def456')
   })
 
   it('returns success response', async () => {
     const result = await handleStoreRoutingCredentials({
-      macaroon: 'base64mac...',
-      preimage: 'abc123preimage',
+      macaroon: 'YWJjMTIz',
+      preimage: 'abc123def456',
     }, mockRoutingClient)
 
     const data = JSON.parse(result.content[0].text)

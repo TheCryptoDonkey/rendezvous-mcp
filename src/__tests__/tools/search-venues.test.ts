@@ -63,7 +63,7 @@ describe('handleSearchVenues', () => {
 
     const data = JSON.parse(result.content[0].text)
     expect(data.success).toBe(false)
-    expect(data.error).toBe('unexpected failure')
+    expect(data.error).toBe('An unexpected error occurred')
     expect(result.isError).toBe(true)
   })
 })

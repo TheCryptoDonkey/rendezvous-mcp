@@ -85,7 +85,23 @@ describe('handleGetDirections', () => {
 
     const data = JSON.parse(result.content[0].text)
     expect(data.success).toBe(false)
-    expect(data.error).toBe('string error')
+    expect(data.error).toBe('An unexpected error occurred')
     expect(result.isError).toBe(true)
+  })
+
+  it('redacts internal URLs from error messages', async () => {
+    mockComputeRoute.mockRejectedValueOnce(
+      new Error('Connection refused to http://10.0.1.5:8002/route'),
+    )
+
+    const result = await handleGetDirections({
+      from: { lat: 51.45, lon: -2.59 },
+      to: { lat: 51.50, lon: -0.12 },
+      transport_mode: 'drive',
+    }, mockRoutingClient)
+
+    const data = JSON.parse(result.content[0].text)
+    expect(data.error).not.toContain('http://10.0.1.5')
+    expect(data.error).toContain('[redacted-url]')
   })
 })
