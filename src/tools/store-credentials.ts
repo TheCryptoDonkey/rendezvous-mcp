@@ -43,9 +43,9 @@ export function registerStoreCredentialsTool(server: McpServer, routingClient: R
         'Once stored, all subsequent routing calls (find_rendezvous, score_venues, get_isochrone, get_directions) ' +
         'will authenticate automatically.',
       inputSchema: {
-        macaroon: z.string().min(1).regex(/^[A-Za-z0-9+/=]+$/, 'Must be valid base64')
+        macaroon: z.string().min(1).max(4096).regex(/^[A-Za-z0-9+/=]+$/, 'Must be valid base64')
           .describe('The macaroon from the payment_required response'),
-        preimage: z.string().min(1).regex(/^[0-9a-fA-F]+$/, 'Must be valid hex')
+        preimage: z.string().min(1).max(128).regex(/^[0-9a-fA-F]+$/, 'Must be valid hex')
           .describe('The payment preimage obtained after paying the invoice'),
       },
     },

@@ -16,6 +16,12 @@ export class L402State {
 
   /** Store credentials after the user pays an invoice. */
   store(macaroon: string, preimage: string): void {
+    if (!/^[A-Za-z0-9+/=]+$/.test(macaroon) || macaroon.length > 4096) {
+      throw new Error('Invalid macaroon: must be base64, max 4096 chars')
+    }
+    if (!/^[0-9a-fA-F]+$/.test(preimage) || preimage.length > 128) {
+      throw new Error('Invalid preimage: must be hex, max 128 chars')
+    }
     this.macaroon = macaroon
     this.preimage = preimage
   }
