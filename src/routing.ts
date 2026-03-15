@@ -88,7 +88,7 @@ export class RoutingClient {
           invoice: str(body.invoice, 2048),
           macaroon: str(body.macaroon, 4096),
           payment_hash: str(body.payment_hash, 128),
-          payment_url: `${this.valhallaUrl}/invoice-status/${str(body.payment_hash, 128)}`,
+          payment_url: `${this.valhallaUrl}/invoice-status/${encodeURIComponent(str(body.payment_hash, 128))}`,
           amount_sats: num(body.amount_sats, 1000),
         }
       } catch {
