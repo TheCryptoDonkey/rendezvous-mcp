@@ -68,7 +68,7 @@
   "homepage": "https://github.com/forgesworn/rendezvous-mcp",
   "funding": {
     "type": "lightning",
-    "url": "https://strike.me/thedonkey"
+    "url": "lightning:thedonkey@strike.me"
   },
   "files": [
     "build",
