@@ -1,0 +1,276 @@
+# rendezvous-mcp
+
+> When people ask "where should we meet?", naive midpoint calculations ignore roads, traffic, and transport modes — making them unfair. rendezvous-mcp is an MCP server that gives AI agents the ability to find genuinely fair meeting points using real travel times, venue availability, and isochrone-based fairness algorithms.
+
+Thin MCP wrapper over [rendezvous-kit](https://github.com/forgesworn/rendezvous-kit) exposing 5 tools via the Model Context Protocol. Works out of the box with free public routing — no API keys needed. For production, self-host Valhalla or use L402 Lightning micropayments for the hosted endpoint.
+
+## Getting started
+
+Add to your MCP client config (Claude Code, Claude Desktop, Cursor, etc.):
+
+```json
+{
+  "mcpServers": {
+    "rendezvous": {
+      "command": "npx",
+      "args": ["rendezvous-mcp"]
+    }
+  }
+}
+```
+
+For HTTP/SSE transport: `TRANSPORT=http npx rendezvous-mcp`
+
+## Environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TRANSPORT` | `stdio` | Transport mode: `stdio` or `http` |
+| `PORT` | `3002` | HTTP server port (HTTP mode only) |
+| `HOST` | `0.0.0.0` | HTTP bind address (HTTP mode only) |
+| `VALHALLA_URL` | `https://routing.trotters.cc` | Routing engine URL |
+| `OVERPASS_URL` | Public endpoints | Venue search (Overpass API) URL |
+| `CORS_ORIGIN` | `*` | CORS allowed origin (HTTP mode) |
+| `RATE_LIMIT_MAX` | `60` | Max requests per minute per IP (HTTP mode) |
+| `TRUST_PROXY` | — | Express trust proxy setting (HTTP mode) |
+
+## Health check (HTTP mode)
+
+`GET /health` returns:
+```json
+{
+  "status": "ok",
+  "server": "rendezvous-mcp",
+  "version": "...",
+  "valhalla_configured": true,
+  "tools": ["score-venues", "search-venues", "get-isochrone", "get-directions", "store-routing-credentials"]
+}
+```
+
+---
+
+## Tools
+
+### `score-venues`
+
+Score candidate venues by travel time fairness for multiple participants. Computes real travel times from each participant to each venue using the routing engine and ranks them by a fairness strategy.
+
+The typical workflow is: call `search-venues` (or use your own knowledge) to get candidate venues, then pass them all to `score-venues` for ranked results.
+
+**Input:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `participants` | `Array<{ lat, lon, label? }>` | 2–10 participant locations |
+| `venues` | `Array<{ lat, lon, name, type? }>` | 1–50 candidate venues to score |
+| `transport_mode` | `'drive' \| 'cycle' \| 'walk'` | How participants will travel |
+| `fairness` | `'min_max' \| 'min_total' \| 'min_variance'?` | Scoring strategy (default: `min_max`) |
+
+Fairness strategies:
+
+| Strategy | Description |
+|----------|-------------|
+| `min_max` | Minimise the longest individual journey (default — most "fair" for the slowest participant) |
+| `min_total` | Minimise total combined travel time (best aggregate efficiency) |
+| `min_variance` | Minimise variance in travel times (most equal journeys) |
+
+**Output (success):**
+
+```json
+{
+  "success": true,
+  "ranked_venues": [
+    {
+      "name": "The Crown",
+      "lat": 51.5074,
+      "lon": -0.1278,
+      "type": "pub",
+      "travel_times": { "Alice": 22.5, "Bob": 19.3, "Carol": 24.1 },
+      "fairness_score": 24.1
+    }
+  ]
+}
+```
+
+Venues are sorted by `fairness_score` ascending (lower is fairer). Unreachable venues are omitted.
+
+**Output (payment required):**
+
+```json
+{
+  "success": false,
+  "status": "payment_required",
+  "message": "Payment required to use the routing endpoint",
+  "invoice": "lnbc...",
+  "macaroon": "AgEL...",
+  "payment_hash": "abc123...",
+  "payment_url": "https://routing.trotters.cc/pay",
+  "amount_sats": 10
+}
+```
+
+When `payment_required` is returned: present the Lightning invoice to the user, then call `store-routing-credentials` with the macaroon and preimage after payment.
+
+---
+
+### `search-venues`
+
+Search OpenStreetMap for venues near a location using the Overpass API. Returns name, coordinates, type, and OSM ID for each result.
+
+**Input:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `lat` | `number` | Centre latitude (-90 to 90) |
+| `lon` | `number` | Centre longitude (-180 to 180) |
+| `radius_km` | `number?` | Search radius in km (0.5–25, default: 5) |
+| `venue_types` | `string[]` | One or more venue types to search for |
+
+Supported venue types: `pub`, `cafe`, `restaurant`, `park`, `library`, `playground`, `community_centre`, `bar`, `fast_food`, `garden`, `theatre`, `arts_centre`, `fitness_centre`, `sports_centre`, `escape_game`, `swimming_pool`, `service_station`
+
+**Output (success):**
+
+```json
+{
+  "success": true,
+  "venue_count": 14,
+  "venues": [
+    {
+      "name": "The Crown",
+      "lat": 51.5074,
+      "lon": -0.1278,
+      "type": "pub",
+      "osm_id": "node/123456"
+    }
+  ]
+}
+```
+
+---
+
+### `get-isochrone`
+
+Compute a reachability polygon (isochrone) showing everywhere reachable from a point within a given travel time and transport mode. Returns GeoJSON.
+
+**Input:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `lat` | `number` | Latitude of starting point |
+| `lon` | `number` | Longitude of starting point |
+| `transport_mode` | `'drive' \| 'cycle' \| 'walk'` | Travel mode |
+| `time_minutes` | `number` | Maximum travel time in minutes (1–120) |
+
+**Output (success):**
+
+```json
+{
+  "success": true,
+  "time_minutes": 30,
+  "transport_mode": "cycle",
+  "polygon": {
+    "type": "Polygon",
+    "coordinates": [[[...], ...]]
+  }
+}
+```
+
+The `polygon` is a GeoJSON `Polygon` object. It can be used to check whether venues fall within the reachable area, or to visually display coverage on a map.
+
+Returns `payment_required` in the same format as `score-venues` if the routing endpoint requires payment.
+
+---
+
+### `get-directions`
+
+Get turn-by-turn directions between two points including distance, duration, and step-by-step instructions.
+
+**Input:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `from` | `{ lat: number, lon: number }` | Starting point |
+| `to` | `{ lat: number, lon: number }` | Destination |
+| `transport_mode` | `'drive' \| 'cycle' \| 'walk'` | Travel mode |
+
+**Output (success):**
+
+```json
+{
+  "success": true,
+  "distance_km": 4.72,
+  "duration_minutes": 18.5,
+  "steps": [
+    {
+      "instruction": "Head north on High Street",
+      "distance_km": 0.35,
+      "duration_minutes": 1.2
+    }
+  ]
+}
+```
+
+Returns `payment_required` in the same format as `score-venues` if the routing endpoint requires payment.
+
+---
+
+### `store-routing-credentials`
+
+Store L402 payment credentials (macaroon + preimage) after paying a Lightning invoice. Once stored, all subsequent routing tool calls authenticate automatically for the session.
+
+Call this after the user has paid the Lightning invoice returned by a `payment_required` response from `score-venues`, `get-isochrone`, or `get-directions`.
+
+**Input:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `macaroon` | `string` | The base64 macaroon from the `payment_required` response |
+| `preimage` | `string` | The hex payment preimage obtained after paying the invoice |
+
+**Output:**
+
+```json
+{
+  "success": true,
+  "message": "L402 credentials stored. Subsequent routing calls will authenticate automatically."
+}
+```
+
+---
+
+## Recommended tool call sequence
+
+1. **Simple fair meeting point:**
+   - Call `search-venues` with a central point and desired venue types
+   - Call `score-venues` with the participants and the venues from step 1
+
+2. **With reachability constraint:**
+   - Call `get-isochrone` for one or more participants to understand their reachable area
+   - Call `search-venues` within that area
+   - Call `score-venues` to rank
+
+3. **If payment required:**
+   - Present the Lightning invoice to the user
+   - After payment, call `store-routing-credentials`
+   - Retry the original tool call
+
+4. **Turn-by-turn directions to the chosen venue:**
+   - Call `get-directions` from each participant to the winning venue
+
+---
+
+## Key concepts
+
+- **Fairness scoring** — venues are ranked by travel time equity across all participants, not just shortest total distance. The default `min_max` strategy protects the participant with the longest journey.
+- **Isochrones** — reachability polygons showing everywhere reachable within N minutes. Useful for filtering venues to only those all participants can reach within a time budget.
+- **Transport modes** — `drive`, `cycle`, `walk`. Each produces very different reachability areas and fairness rankings.
+- **L402 payments** — the hosted Valhalla routing endpoint at `routing.trotters.cc` uses Lightning micropayments. Self-hosted Valhalla has no payment requirement.
+- **Handler extraction** — each tool is an exported `handle*()` function (testable without MCP framework) plus a one-liner `register*Tool()` registration.
+
+---
+
+## Links
+
+- [npm](https://www.npmjs.com/package/rendezvous-mcp)
+- [GitHub](https://github.com/forgesworn/rendezvous-mcp)
+- [rendezvous-kit](https://github.com/forgesworn/rendezvous-kit) — the underlying TypeScript library
