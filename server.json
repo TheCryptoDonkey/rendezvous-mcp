@@ -1,6 +1,6 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.forgesworn/rendezvous-mcp",
+  "name": "dev.forgesworn/rendezvous-mcp",
   "description": "Fair meeting point discovery for AI agents. Isochrone-based travel time fairness scoring, OSM venue search, multiple routing engines. The only MCP server for location fairness.",
   "repository": {
     "url": "https://github.com/forgesworn/rendezvous-mcp",
