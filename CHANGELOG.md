@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/forgesworn/rendezvous-mcp/compare/v1.1.0...v1.1.1) (2026-04-07)
+
+
+### Bug Fixes
+
+* remove stale find-rendezvous reference from store-credentials tool description ([f5dcbc9](https://github.com/forgesworn/rendezvous-mcp/commit/f5dcbc979042a619089b203beb35b9cb98417d2e))
+
 # [1.1.0](https://github.com/forgesworn/rendezvous-mcp/compare/v1.0.1...v1.1.0) (2026-03-25)
 
 
