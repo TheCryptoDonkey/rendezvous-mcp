@@ -40,7 +40,7 @@ export function registerStoreCredentialsTool(server: McpServer, routingClient: R
       description:
         'Store L402 payment credentials (macaroon + preimage) after paying a routing invoice. ' +
         'Call this after the user has paid the Lightning invoice returned by a payment_required response. ' +
-        'Once stored, all subsequent routing calls (find-rendezvous, score-venues, get-isochrone, get-directions) ' +
+        'Once stored, all subsequent routing calls (score-venues, get-isochrone, get-directions) ' +
         'will authenticate automatically.',
       inputSchema: {
         macaroon: z.string().min(1).max(4096).regex(/^[A-Za-z0-9+/=]+$/, 'Must be valid base64')
