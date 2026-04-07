@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/forgesworn/rendezvous-mcp/compare/v1.1.1...v1.1.2) (2026-04-07)
+
+
+### Bug Fixes
+
+* publish mcpName field for MCP registry validation ([1582394](https://github.com/forgesworn/rendezvous-mcp/commit/1582394a4045210f5b813b6cfd0ca0a8f012997a))
+
 ## [1.1.1](https://github.com/forgesworn/rendezvous-mcp/compare/v1.1.0...v1.1.1) (2026-04-07)
 
 
