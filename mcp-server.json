@@ -1,0 +1,34 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.forgesworn/rendezvous-mcp",
+  "description": "Fair meeting point discovery for AI agents. Uses real travel-time isochrones (not naive midpoints) to find venues equally accessible to all participants. 5 tools: isochrone computation, venue search, fairness scoring, turn-by-turn directions, and L402 credential storage for paid routing engines.",
+  "repository": {
+    "url": "https://github.com/forgesworn/rendezvous-mcp",
+    "source": "github"
+  },
+  "version_detail": {
+    "version": "1.1.0"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "rendezvous-mcp",
+      "runtime": "node",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "VALHALLA_URL",
+          "description": "Valhalla routing engine URL. Defaults to a public endpoint.",
+          "required": false
+        },
+        {
+          "name": "OVERPASS_URL",
+          "description": "Overpass API URL for venue search. Defaults to public endpoints.",
+          "required": false
+        }
+      ]
+    }
+  ]
+}

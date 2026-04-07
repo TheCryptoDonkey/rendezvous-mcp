@@ -1,0 +1,29 @@
+startCommand:
+  type: stdio
+  commandFunction: |-
+    (config) => ({
+      command: "npx",
+      args: ["rendezvous-mcp"],
+      env: {
+        ...(config.valhallaUrl ? { VALHALLA_URL: config.valhallaUrl } : {}),
+        ...(config.overpassUrl ? { OVERPASS_URL: config.overpassUrl } : {})
+      }
+    })
+
+configSchema:
+  type: object
+  properties:
+    valhallaUrl:
+      type: string
+      title: Valhalla routing engine URL
+      description: >
+        URL of a Valhalla routing engine instance. Defaults to a public
+        endpoint. Self-host for production use or higher rate limits.
+    overpassUrl:
+      type: string
+      title: Overpass API URL
+      description: >
+        URL of an Overpass API instance for venue search. Defaults to
+        public endpoints with round-robin load balancing.
+
+exampleConfig: {}
