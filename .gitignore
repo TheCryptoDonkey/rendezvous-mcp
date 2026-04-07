@@ -3,3 +3,4 @@ build/
 .idea/
 .claude/settings.local.json
 .mcp.json
+.mcpregistry_*
